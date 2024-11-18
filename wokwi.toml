@@ -1,0 +1,6 @@
+[wokwi]
+version = 1
+elf = "build/roctl.elf"
+firmware = "build/roctl.bin"
+gdbServerPort=3333
+
