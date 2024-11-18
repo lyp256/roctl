@@ -16,8 +16,11 @@
 #define NullTime -1
 #define drainTimeout 15       // 最大陈水排放时间，秒
 #define rinseTimeout 15       // 最大冲洗时间，秒
+#define maxMakeWaterTime 1800 // 最大制水时间，防止水路漏水导致不停制水
 #define rinseThresholdTime 60 // 运行多久后开始冲洗，秒
 #define desaltRote 95         // 脱盐率，百分比
+#define TDSRX GPIO_NUM_4     // tds uart rx
+#define TDSTX GPIO_NUM_5    // tds uart tx
 
 // TDS 数据
 // Sensor1 in tds
@@ -128,6 +131,14 @@ void makeWater()
             storageSw = false;
             drainSw = true;
         }
+        if (makeWaterTime > maxMakeWaterTime)
+        {
+            storageSw = false;
+            drainSw = false;
+            inSw = false;
+            pupmSw = false;
+            rinseSw = false;
+        }
     }
     else
     {
@@ -179,32 +190,22 @@ void makeWater()
 
 void syncTDS(void)
 {
-    printf("start sync tds!\n");
-
+    ESP_LOGI("TDS", "start sync tds!\n");
     Uart pin = {
         .uartNum = UART_NUM_2,
-        .txNum = 17,
-        .rxNum = 16,
+        .txNum = TDSTX,
+        .rxNum = TDSRX,
     };
     InitUart(&pin);
     for (int i = 0; true; i++)
     {
-        Bat3uData res;
-        ZeroData(&res);
-        printf("befor\n");
-        PrintBat3uData(&res);
-        int resCode = GetBat3uData(&pin, &res);
+        ZeroData(&tdsData);
+        int resCode = GetBat3uData(&pin, &tdsData);
         if (resCode != 0)
         {
             printf("GetBat3uData:%d\n", resCode);
         }
-        else
-        {
-            printf("after\n");
-            PrintBat3uData(&res);
-        }
-        printf("\n");
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
@@ -224,6 +225,7 @@ void app_main(void)
     frames[7] = (ledFrame){.color = whiteColor, .frames = 2};
     frames[8] = (ledFrame){.color = noColor, .frames = 2};
     setPlayBook(&ledPlayBook, frames, 9);
+    xTaskCreate(syncTDS, "syncTDS", 10240, NULL, 1, NULL);
     xTaskCreate(ledLoopTask, "ledLoopTask", 10240, &ledPlayBook, 1, NULL);
     initSwGPIO();
     for (uint32_t i = 0; true; i++)

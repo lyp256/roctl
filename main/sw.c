@@ -11,20 +11,20 @@
 #include "esp_log.h"
 #include "sw.h"
 
-const int lowSwNum = GPIO_NUM_13;
-const int highSwNum = GPIO_NUM_12;
+const int lowSwNum = GPIO_NUM_13;  // 低压开关
+const int highSwNum = GPIO_NUM_12; // 高压开关
 
-const int pupmSwNum = GPIO_NUM_1;
-const int inSwNum = GPIO_NUM_2;
-const int rinseSwNum = GPIO_NUM_42;
-const int drainSwNum = GPIO_NUM_41;
-const int storageSwNum = GPIO_NUM_40;
+const int pupmSwNum = GPIO_NUM_1;     // 压力泵
+const int inSwNum = GPIO_NUM_2;       // 进水
+const int rinseSwNum = GPIO_NUM_42;   // 冲洗
+const int drainSwNum = GPIO_NUM_41;   // 沉水回流
+const int storageSwNum = GPIO_NUM_40; // 压力开关泵
 
-volatile bool pupmSw = false;
-volatile bool inSw = false;
-volatile bool rinseSw = false;
-volatile bool drainSw = false;
-volatile bool storageSw = false;
+volatile bool pupmSw = false;    // 压力泵
+volatile bool inSw = false;      // 进水开关
+volatile bool rinseSw = false;   // 冲洗开关
+volatile bool drainSw = false;   // 陈水回流开关
+volatile bool storageSw = false; // 储水桶开关
 
 int lowSw()
 {
@@ -55,13 +55,13 @@ void initSwGPIO()
     {
         int num = ins[i];
         gpio_config_t cfg = {
-        .pin_bit_mask = BIT64(num),
-        .mode = GPIO_MODE_INPUT,
-        .pull_up_en = false,
-        .pull_down_en = true,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&cfg);
+            .pin_bit_mask = BIT64(num),
+            .mode = GPIO_MODE_INPUT,
+            .pull_up_en = false,
+            .pull_down_en = true,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        gpio_config(&cfg);
     }
 }
 

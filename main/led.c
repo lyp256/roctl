@@ -5,7 +5,7 @@
 #include "led_strip.h"
 #include "led.h"
 
-#define BLINK_GPIO GPIO_NUM_48
+#define LED_GPIO GPIO_NUM_48
 #define FRAMETIME 40 // 帧持续时间毫秒
 
 static led_strip_handle_t led_strip;
@@ -43,7 +43,7 @@ void rgbLED(color_t rgb)
 void configureLED(void)
 {
     led_strip_config_t strip_config = {
-        .strip_gpio_num = BLINK_GPIO,
+        .strip_gpio_num = LED_GPIO,
         .max_leds = 1,
     };
     led_strip_rmt_config_t rmt_config = {
