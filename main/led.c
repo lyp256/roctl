@@ -74,8 +74,8 @@ void blinkPlayBook(ledPlays *play, color_t rgb, uint16_t d)
     }
     play->data = malloc(sizeof(ledFrame) * 2);
     ledFrame *p = play->data;
-    p[0]=(ledFrame){rgb,d};
-    p[1]=(ledFrame){noColor,d};
+    p[0] = (ledFrame){rgb, d};
+    p[1] = (ledFrame){noColor, d};
     play->len = 2;
 }
 
@@ -87,7 +87,7 @@ void alwaysOnPlayBook(ledPlays *play, color_t rgb)
     }
     play->data = makeFrames(1);
     ledFrame *p = play->data;
-    p[0]=(ledFrame){rgb,25};
+    p[0] = (ledFrame){rgb, 25};
     play->len = 1;
 }
 
@@ -96,20 +96,14 @@ ledFrame *makeFrames(size_t n)
     return malloc(sizeof(ledFrame) * n);
 };
 
-int setPlayBook(ledPlays *play, ledFrame *frames, size_t n)
+void setPlayBook(ledPlays *play, ledFrame *frames, size_t n)
 {
-    size_t total= sizeof(frames);
-    if (total / sizeof(ledFrame) < n)
-    {
-        return 1;
-    }
     if (play->data != NULL)
     {
         resetLEDPlays(play);
     }
     play->data = frames;
     play->len = n;
-    return 0;
 }
 
 void ledLoopTask(ledPlays *playBook)
@@ -125,7 +119,7 @@ void ledLoopTask(ledPlays *playBook)
             continue;
         }
         ledFrame *data = playBook->data;
-
+        ESP_LOGI("led", "play: %d frames,", playBook->len);
         for (size_t i = 0; i < playBook->len; i++)
         {
             ledFrame *curr = data + i;

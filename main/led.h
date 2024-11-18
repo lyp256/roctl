@@ -38,6 +38,6 @@ void configureLED(void);
 void blinkPlayBook(ledPlays *play, color_t rgb, uint16_t d);
 void alwaysOnPlayBook(ledPlays *play, color_t rgb);
 ledFrame *makeFrames(size_t n);
-int setPlayBook(ledPlays *play, ledFrame *frames, size_t n);
+void setPlayBook(ledPlays *play, ledFrame *frames, size_t n);
 void ledLoopTask(ledPlays *playBook);
 #endif

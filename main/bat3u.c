@@ -120,7 +120,7 @@ static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, in
         {
             break;
         }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     if (length == 0)
     {
