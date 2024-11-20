@@ -146,3 +146,33 @@ void PrintBat3uData(Bat3uData *data)
     printf("Sensor3.TDS:%d\n", data->Sensor3.TDS);
     printf("Sensor3.TEMP:%d\n", data->Sensor3.TEMP);
 }
+
+#define TDSRX GPIO_NUM_5      // tds uart rx
+#define TDSTX GPIO_NUM_4      // tds uart tx
+
+// TDS 数据
+// Sensor1 in tds
+// Sensor2 dirain tds
+// sensor3 out tds
+volatile Bat3uData tdsData;
+
+void syncTDS(void)
+{
+    ESP_LOGI("TDS", "start sync tds!\n");
+    Uart pin = {
+        .uartNum = UART_NUM_2,
+        .txNum = TDSTX,
+        .rxNum = TDSRX,
+    };
+    InitUart(&pin);
+    for (int i = 0; true; i++)
+    {
+        ZeroData(&tdsData);
+        int resCode = GetBat3uData(&pin, &tdsData);
+        if (resCode != 0)
+        {
+            printf("GetBat3uData:%d\n", resCode);
+        }
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}

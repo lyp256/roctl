@@ -11,7 +11,7 @@
 #include "esp_log.h"
 #include "sw.h"
 
-const int lowSwNum = GPIO_NUM_13;  // 低压开关
+const int lowSwNum = GPIO_NUM_11;  // 低压开关
 const int highSwNum = GPIO_NUM_12; // 高压开关
 
 const int pupmSwNum = GPIO_NUM_1;     // 压力泵

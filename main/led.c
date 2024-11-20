@@ -119,7 +119,7 @@ void ledLoopTask(ledPlays *playBook)
             continue;
         }
         ledFrame *data = playBook->data;
-        ESP_LOGI("led", "play: %d frames,", playBook->len);
+        ESP_LOGD("led", "play: %d frames,", playBook->len);
         for (size_t i = 0; i < playBook->len; i++)
         {
             ledFrame *curr = data + i;
@@ -132,7 +132,7 @@ void ledLoopTask(ledPlays *playBook)
             {
                 curr->frames = 1;
             }
-            ESP_LOGI("led", "color:%s\n,frame:%d,duration:%d ms\n", cs, curr->frames, curr->frames * FRAMETIME);
+            ESP_LOGD("led", "color:%s\n,frame:%d,duration:%d ms\n", cs, curr->frames, curr->frames * FRAMETIME);
             for (size_t i = 0; i < curr->frames; i++)
             {
                 vTaskDelay(pdMS_TO_TICKS(FRAMETIME));

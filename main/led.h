@@ -33,7 +33,6 @@ extern const color_t orangeColor;
 extern const color_t whiteColor;
 extern const color_t noColor;
 
-void rgbLED(color_t rgb);
 void configureLED(void);
 void blinkPlayBook(ledPlays *play, color_t rgb, uint16_t d);
 void alwaysOnPlayBook(ledPlays *play, color_t rgb);

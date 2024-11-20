@@ -15,7 +15,7 @@
       "type": "wokwi-led",
       "id": "led-red1",
       "top": -106.8,
-      "left": -214.2,
+      "left": -175.8,
       "rotate": 90,
       "attrs": { "color": "red" }
     },
@@ -24,7 +24,7 @@
       "type": "wokwi-led",
       "id": "led-red3",
       "top": -97.2,
-      "left": -175.8,
+      "left": -137.4,
       "rotate": 90,
       "attrs": { "color": "green" }
     },
@@ -32,7 +32,7 @@
       "type": "wokwi-led",
       "id": "led-red4",
       "top": -87.6,
-      "left": -137.4,
+      "left": -89.4,
       "rotate": 90,
       "attrs": { "color": "blue" }
     },
@@ -40,7 +40,7 @@
       "type": "wokwi-led",
       "id": "led-red8",
       "top": -78,
-      "left": -99,
+      "left": -41.4,
       "rotate": 90,
       "attrs": { "color": "yellow" }
     },
@@ -48,7 +48,7 @@
       "type": "wokwi-led",
       "id": "led-red9",
       "top": -68.4,
-      "left": -60.6,
+      "left": 16.2,
       "rotate": 90,
       "attrs": { "color": "white" }
     },
@@ -58,7 +58,6 @@
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
     [ "sw2:3", "esp:12", "black", [ "v0" ] ],
-    [ "sw1:3", "esp:13", "black", [ "v28.8", "h230.6" ] ],
     [ "sw1:2", "esp:3V3.1", "red", [ "v19.2", "h67.3", "v-163.2" ] ],
     [ "sw2:2", "esp:3V3.1", "red", [ "v0" ] ],
     [ "esp:GND.2", "led-red1:C", "black", [ "h28.8", "v18.8" ] ],
@@ -67,13 +66,14 @@
     [ "led-red4:C", "led-red8:C", "black", [ "v-9.2", "h28.8" ] ],
     [ "led-red8:C", "led-red9:C", "black", [ "v-9.2", "h48" ] ],
     [ "led-red1:A", "esp:1", "green", [ "h-9.6", "v9.6" ] ],
-    [ "led-red3:A", "esp:2", "green", [ "v38.4", "h38.4", "v76.8" ] ],
-    [ "led-red4:A", "esp:42", "green", [ "v0", "h-124.8" ] ],
-    [ "led-red8:A", "esp:41", "green", [ "v38.4", "h-57.6" ] ],
-    [ "led-red9:A", "esp:40", "green", [ "v40.8", "h-160.4" ] ],
+    [ "led-red3:A", "esp:2", "green", [ "v9.6", "h-38.4", "v-9.6" ] ],
+    [ "led-red4:A", "esp:42", "green", [ "v9.6", "h-96", "v-9.6" ] ],
+    [ "led-red8:A", "esp:41", "green", [ "v9.6", "h-144", "v-9.6" ] ],
+    [ "led-red9:A", "esp:40", "green", [ "v9.6", "h-201.6", "v-9.6" ] ],
     [ "rgb1:DIN", "esp:48", "green", [ "v-9.6", "h28" ] ],
     [ "rgb1:VDD", "esp:3V3.1", "red", [ "h-9.6", "v-153.6" ] ],
-    [ "rgb1:VSS", "esp:GND.3", "black", [ "v0" ] ]
+    [ "rgb1:VSS", "esp:GND.3", "black", [ "v0" ] ],
+    [ "sw1:3", "esp:11", "black", [ "v0" ] ]
   ],
   "dependencies": {}
 }

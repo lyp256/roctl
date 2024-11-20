@@ -26,4 +26,7 @@ int GetBat3uData(Uart *uart, Bat3uData *res);
 esp_err_t InitUart(Uart *pin);
 void PrintBat3uData(Bat3uData *data);
 void ZeroData(Bat3uData *res);
+
+extern volatile Bat3uData tdsData;
+void syncTDS(void);
 #endif
