@@ -5,14 +5,14 @@ typedef struct
 {
     short TDS;  // 单位 ppm
     short TEMP; // 单位 0.01 摄氏度
-} SensorData;
+} SensorDataT;
 
 typedef struct
 {
-    SensorData Sensor1;
-    SensorData Sensor2;
-    SensorData Sensor3;
-} Bat3uData;
+    SensorDataT Sensor1;
+    SensorDataT Sensor2;
+    SensorDataT Sensor3;
+} Bat3uDataT;
 
 
 typedef struct
@@ -20,13 +20,13 @@ typedef struct
     uart_port_t uartNum;
     int txNum, rxNum;
 
-} Uart;
+} UartT;
 
-int GetBat3uData(Uart *uart, Bat3uData *res);
-esp_err_t InitUart(Uart *pin);
-void PrintBat3uData(Bat3uData *data);
-void ZeroData(Bat3uData *res);
+int GetBat3uData(UartT *UartT, Bat3uDataT *res);
+esp_err_t InitUart(UartT *pin);
+void PrintBat3uData(Bat3uDataT *data);
+void ZeroData(Bat3uDataT *res);
 
-extern volatile Bat3uData tdsData;
+extern volatile Bat3uDataT tdsData;
 void syncTDS(void);
 #endif

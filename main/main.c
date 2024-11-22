@@ -13,16 +13,18 @@
 #include "led.h"
 #include "makewater.h"
 
-ledPlays ledPlayBook = {NULL, 0};
+
 
 void app_main(void)
 {
+    ledPlays_t ledPlayBook = {NULL, 0};
+
     xTaskCreate(syncTDS, "syncTDS", 10240, NULL, 1, NULL);
     xTaskCreate(ledLoopTask, "ledLoopTask", 10240, &ledPlayBook, 1, NULL);
     initSwGPIO();
     for (uint32_t i = 0; true; i++)
     {
-        makeWater();
+        makeWater(&ledPlayBook);
         vTaskDelay(pdMS_TO_TICKS(1500));
     }
 }

@@ -56,7 +56,7 @@ void configureLED(void)
     led_strip_clear(led_strip);
 }
 
-void resetLEDPlays(ledPlays *play)
+void resetLEDPlays(ledPlays_t *play)
 {
     if (play->data != NULL)
     {
@@ -66,37 +66,37 @@ void resetLEDPlays(ledPlays *play)
     play->len = 0;
 }
 
-void blinkPlayBook(ledPlays *play, color_t rgb, uint16_t d)
+void blinkPlayBook(ledPlays_t *play, color_t rgb, uint16_t d)
 {
     if (play->data != NULL)
     {
         resetLEDPlays(play);
     }
-    play->data = malloc(sizeof(ledFrame) * 2);
-    ledFrame *p = play->data;
-    p[0] = (ledFrame){rgb, d};
-    p[1] = (ledFrame){noColor, d};
+    play->data = malloc(sizeof(ledFrame_t) * 2);
+    ledFrame_t *p = play->data;
+    p[0] = (ledFrame_t){rgb, d};
+    p[1] = (ledFrame_t){noColor, d};
     play->len = 2;
 }
 
-void alwaysOnPlayBook(ledPlays *play, color_t rgb)
+void alwaysOnPlayBook(ledPlays_t *play, color_t rgb)
 {
     if (play->data != NULL)
     {
         resetLEDPlays(play);
     }
     play->data = makeFrames(1);
-    ledFrame *p = play->data;
-    p[0] = (ledFrame){rgb, 25};
+    ledFrame_t *p = play->data;
+    p[0] = (ledFrame_t){rgb, 25};
     play->len = 1;
 }
 
-ledFrame *makeFrames(size_t n)
+ledFrame_t *makeFrames(size_t n)
 {
-    return malloc(sizeof(ledFrame) * n);
+    return malloc(sizeof(ledFrame_t) * n);
 };
 
-void setPlayBook(ledPlays *play, ledFrame *frames, size_t n)
+void setPlayBook(ledPlays_t *play, ledFrame_t *frames, size_t n)
 {
     if (play->data != NULL)
     {
@@ -106,7 +106,13 @@ void setPlayBook(ledPlays *play, ledFrame *frames, size_t n)
     play->len = n;
 }
 
-void ledLoopTask(ledPlays *playBook)
+void setFrame(ledFrame_t *frame, color_t color, uint16_t fc)
+{
+    frame->color = color;
+    frame->frames = fc;
+}
+
+void ledLoopTask(ledPlays_t *playBook)
 {
     configureLED();
     while (1)
@@ -118,22 +124,22 @@ void ledLoopTask(ledPlays *playBook)
             vTaskDelay(pdMS_TO_TICKS(FRAMETIME));
             continue;
         }
-        ledFrame *data = playBook->data;
+        ledFrame_t *data = playBook->data;
         ESP_LOGD("led", "play: %d frames,", playBook->len);
         for (size_t i = 0; i < playBook->len; i++)
         {
-            ledFrame *curr = data + i;
-            color_t rgb = curr->color;
+            ledFrame_t curr = data[i];
+            color_t rgb = curr.color;
             char cs[7];
             rgbString(cs, rgb);
 
             rgbLED(rgb);
-            if (curr->frames < 1)
+            if (curr.frames < 1)
             {
-                curr->frames = 1;
+                curr.frames = 1;
             }
-            ESP_LOGD("led", "color:%s\n,frame:%d,duration:%d ms\n", cs, curr->frames, curr->frames * FRAMETIME);
-            for (size_t i = 0; i < curr->frames; i++)
+            ESP_LOGD("led", "color:%s\n,frame:%d,duration:%d ms\n", cs, curr.frames, curr.frames * FRAMETIME);
+            for (size_t i = 0; i < curr.frames; i++)
             {
                 vTaskDelay(pdMS_TO_TICKS(FRAMETIME));
                 if (data != playBook->data)

@@ -15,13 +15,13 @@ typedef struct
 {
     color_t color;   // 颜色
     uint16_t frames; // 持续的帧数，一帧代表 1/25 秒
-} ledFrame;
+} ledFrame_t;
 
 typedef struct
 {
-    ledFrame *data; // 数据
+    ledFrame_t *data; // 数据
     size_t len;
-} ledPlays;
+} ledPlays_t;
 
 extern const color_t redColor;
 extern const color_t greenColor;
@@ -34,9 +34,10 @@ extern const color_t whiteColor;
 extern const color_t noColor;
 
 void configureLED(void);
-void blinkPlayBook(ledPlays *play, color_t rgb, uint16_t d);
-void alwaysOnPlayBook(ledPlays *play, color_t rgb);
-ledFrame *makeFrames(size_t n);
-void setPlayBook(ledPlays *play, ledFrame *frames, size_t n);
-void ledLoopTask(ledPlays *playBook);
+void blinkPlayBook(ledPlays_t *play, color_t rgb, uint16_t d);
+void alwaysOnPlayBook(ledPlays_t *play, color_t rgb);
+ledFrame_t *makeFrames(size_t n);
+void setPlayBook(ledPlays_t *play, ledFrame_t *frames, size_t n);
+void setFrame(ledFrame_t *frame, color_t color, uint16_t fc);
+void ledLoopTask(ledPlays_t *playBook);
 #endif

@@ -15,14 +15,14 @@ const int BatErrDeviceBusy = 2;        // 2 忙碌中 03：
 const int BatErrCalibrationFailed = 3; // 3 校正失败
 const int BatErrTempOverflow = 4;      // 4 检测温度超出范围
 
-static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, int receiveSize, int *receiveN);
+static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, int receiveSize, int *receiveN);
 
 short parseShort(char bytes[2])
 {
     return (short)(bytes[0]) << 8 | (short)(bytes[1]);
 }
 
-void ZeroData(Bat3uData *res)
+void ZeroData(Bat3uDataT *res)
 {
     res->Sensor1.TDS = 0;
     res->Sensor1.TEMP = 0;
@@ -32,7 +32,7 @@ void ZeroData(Bat3uData *res)
     res->Sensor3.TEMP = 0;
 }
 
-void parseSensorsResult(void *data, Bat3uData *res)
+void parseSensorsResult(void *data, Bat3uDataT *res)
 {
     ZeroData(res);
     res->Sensor1.TDS = parseShort(data);
@@ -43,7 +43,7 @@ void parseSensorsResult(void *data, Bat3uData *res)
     res->Sensor3.TEMP = parseShort(data + 10);
 }
 
-int GetBat3uData(Uart *uart, Bat3uData *res)
+int GetBat3uData(UartT *UartT, Bat3uDataT *res)
 {
     const char directive[6] = "\xA0\x00\x00\x00\x00\xA0";
 
@@ -52,7 +52,7 @@ int GetBat3uData(Uart *uart, Bat3uData *res)
     char data[14];
     int length;
     esp_err_t resCode;
-    resCode = UartCall(uart, directive, 6, data, dataSize, &length);
+    resCode = UartCall(UartT, directive, 6, data, dataSize, &length);
     if (resCode != ESP_OK)
     {
         return resCode;
@@ -62,7 +62,7 @@ int GetBat3uData(Uart *uart, Bat3uData *res)
     return BatErrSuccess;
 }
 
-esp_err_t InitUart(Uart *pin)
+esp_err_t InitUart(UartT *pin)
 {
     uart_config_t uart_config = {
         .baud_rate = 9600,
@@ -72,7 +72,7 @@ esp_err_t InitUart(Uart *pin)
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
     };
 
-    // Configure UART parameters
+    // Configure UartT parameters
     esp_err_t resCode = uart_param_config(pin->uartNum, &uart_config);
     if (resCode != ESP_OK)
     {
@@ -85,11 +85,11 @@ esp_err_t InitUart(Uart *pin)
         return resCode;
     }
 
-    // Setup UART buffered IO with event queue
+    // Setup UartT buffered IO with event queue
     const int uart_buffer_size = 1 << 10;
     QueueHandle_t uart_queue;
 
-    // Install UART driver using an event queue here
+    // Install UartT driver using an event queue here
     resCode = uart_driver_install(pin->uartNum, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0);
     if (resCode != ESP_OK)
     {
@@ -98,7 +98,7 @@ esp_err_t InitUart(Uart *pin)
     return ESP_OK;
 }
 
-static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, int receiveSize, int *receiveN)
+static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, int receiveSize, int *receiveN)
 {
     int length = length = uart_write_bytes(pin->uartNum, (const char *)send, sendSize);
     if (length != sendSize)
@@ -106,7 +106,7 @@ static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, in
         // todo
     }
 
-    // Read data from UART.
+    // Read data from UartT.
     length = 0;
     for (long i = 0; i < 10; i++)
     {
@@ -120,7 +120,7 @@ static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, in
         {
             break;
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
     if (length == 0)
     {
@@ -137,7 +137,7 @@ static esp_err_t UartCall(Uart *pin, void *send, int sendSize, void *receive, in
     return 0;
 }
 
-void PrintBat3uData(Bat3uData *data)
+void PrintBat3uData(Bat3uDataT *data)
 {
     printf("Sensor1.TDS:%d\n", data->Sensor1.TDS);
     printf("Sensor1.TEMP:%d\n", data->Sensor1.TEMP);
@@ -147,19 +147,19 @@ void PrintBat3uData(Bat3uData *data)
     printf("Sensor3.TEMP:%d\n", data->Sensor3.TEMP);
 }
 
-#define TDSRX GPIO_NUM_5      // tds uart rx
-#define TDSTX GPIO_NUM_4      // tds uart tx
+#define TDSRX GPIO_NUM_5      // tds UartT rx
+#define TDSTX GPIO_NUM_4      // tds UartT tx
 
 // TDS 数据
 // Sensor1 in tds
 // Sensor2 dirain tds
 // sensor3 out tds
-volatile Bat3uData tdsData;
+volatile Bat3uDataT tdsData;
 
 void syncTDS(void)
 {
     ESP_LOGI("TDS", "start sync tds!\n");
-    Uart pin = {
+    UartT pin = {
         .uartNum = UART_NUM_2,
         .txNum = TDSTX,
         .rxNum = TDSRX,
