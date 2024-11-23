@@ -12,6 +12,7 @@
 #include "bat3u.h"
 #include "sw.h"
 #include "led.h"
+#include "oled.h"
 
 #define StateStandBy 1
 #define StateNoWater 2
@@ -178,6 +179,7 @@ void makeWater(ledPlays_t *ledPlayBook)
     switch (state)
     {
     case StateRinse:
+        sprintf(uiStatusText, "Rinse");
         setFrame(&frames[0], yellowColor, 10);
         setFrame(&frames[0], noColor, 10);
         pupmSw = true;
@@ -187,6 +189,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         storageSw = false;
         break;
     case StateMakeWater:
+        sprintf(uiStatusText, "MakeWater");
         setFrame(&frames[0], blueColor, 10);
         setFrame(&frames[0], blueColor, 10);
         pupmSw = true;
@@ -196,6 +199,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         storageSw = true;
         break;
     case StateMakeWaterDrain:
+        sprintf(uiStatusText, "MakeWaterDrain");
         setFrame(&frames[0], blueColor, 10);
         setFrame(&frames[0], yellowColor, 10);
         pupmSw = true;
@@ -205,6 +209,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         storageSw = false;
         break;
     case StateMakeWaterTimeout:
+        sprintf(uiStatusText, "MakeTimeout");
         setFrame(&frames[0], blueColor, 10);
         setFrame(&frames[0], redColor, 10);
         pupmSw = false;
@@ -214,6 +219,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         storageSw = false;
         break;
     case StateStandBy:
+        sprintf(uiStatusText, "StandBy");
         setFrame(&frames[0], greenColor, 10);
         setFrame(&frames[0], greenColor, 10);
         pupmSw = false;
@@ -223,6 +229,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         storageSw = false;
         break;
     case StateNoWater:
+        uiStatusText = "NoInWater";
         setFrame(&frames[0], redColor, 10);
         setFrame(&frames[0], noColor, 10);
         pupmSw = false;

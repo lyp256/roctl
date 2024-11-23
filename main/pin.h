@@ -13,7 +13,7 @@
 
 #define TDSRX GPIO_NUM_21  // tds UartT rx
 #define TDSTX GPIO_NUM_20  // tds UartT tx
-#define TDSUART UART_NUM_0 // tds uart chan
+#define TDSUART UART_NUM_1 // tds uart chan
 
-#define OLEDSCL GPIO_NUM_9 // oled iic scl
 #define OLEDSDA GPIO_NUM_8 // oled iic sda
+#define OLEDSCL GPIO_NUM_9 // oled iic scl

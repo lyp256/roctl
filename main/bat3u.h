@@ -1,6 +1,6 @@
 #ifndef _BAT3U_H_
 #define _BAT3U_H_
-
+#include "driver/uart.h"
 typedef struct
 {
     short TDS;  // 单位 ppm
