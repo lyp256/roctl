@@ -28,5 +28,5 @@ void PrintBat3uData(Bat3uDataT *data);
 void ZeroData(Bat3uDataT *res);
 
 extern volatile Bat3uDataT tdsData;
-void syncTDS(void);
+void syncTDS(UartT *pin);
 #endif

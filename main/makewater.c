@@ -63,7 +63,7 @@ short desaltTDS(short in)
 // 水质合格
 bool goodWater()
 {
-    if (tdsData.Sensor1.TDS == 0)
+    if (tdsData.Sensor3.TDS == 0||tdsData.Sensor1.TDS == 0)
     {
         return false;
     }
@@ -103,7 +103,6 @@ int makeWaterState()
         if (startRinseAt != NullTime)
         {
             ESP_LOGI("makeWater", "stop rinse");
-            startRinseAt = NullTime;
         }
 
         // 制水逻辑
@@ -142,7 +141,7 @@ int makeWaterState()
         if (makeWaterTotalTime > rinseThresholdTime)
         {
             // 需要冲洗
-            if (startRinseAt != NullTime)
+            if (startRinseAt == NullTime)
             {
                 ESP_LOGI("makeWater", "start rinse\n");
                 startRinseAt = now;
@@ -179,7 +178,7 @@ void makeWater(ledPlays_t *ledPlayBook)
     {
     case StateRinse:
         setFrame(&frames[0], yellowColor, 10);
-        setFrame(&frames[0], noColor, 10);
+        setFrame(&frames[1], noColor, 10);
         pupmSw = true;
         inSw = true;
         rinseSw = true;
@@ -188,7 +187,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         break;
     case StateMakeWater:
         setFrame(&frames[0], blueColor, 10);
-        setFrame(&frames[0], blueColor, 10);
+        setFrame(&frames[1], blueColor, 10);
         pupmSw = true;
         inSw = true;
         rinseSw = false;
@@ -197,7 +196,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         break;
     case StateMakeWaterDrain:
         setFrame(&frames[0], blueColor, 10);
-        setFrame(&frames[0], yellowColor, 10);
+        setFrame(&frames[1], yellowColor, 10);
         pupmSw = true;
         inSw = true;
         rinseSw = false;
@@ -206,7 +205,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         break;
     case StateMakeWaterTimeout:
         setFrame(&frames[0], blueColor, 10);
-        setFrame(&frames[0], redColor, 10);
+        setFrame(&frames[1], redColor, 10);
         pupmSw = false;
         inSw = false;
         rinseSw = false;
@@ -215,7 +214,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         break;
     case StateStandBy:
         setFrame(&frames[0], greenColor, 10);
-        setFrame(&frames[0], greenColor, 10);
+        setFrame(&frames[1], greenColor, 10);
         pupmSw = false;
         inSw = false;
         rinseSw = false;
@@ -224,7 +223,7 @@ void makeWater(ledPlays_t *ledPlayBook)
         break;
     case StateNoWater:
         setFrame(&frames[0], redColor, 10);
-        setFrame(&frames[0], noColor, 10);
+        setFrame(&frames[1], noColor, 10);
         pupmSw = false;
         inSw = false;
         rinseSw = false;
@@ -242,6 +241,7 @@ void makeWater(ledPlays_t *ledPlayBook)
     if (lastState != state)
     {
         setPlayBook(ledPlayBook, frames, framesLen);
+        ESP_LOGI("makeWatrt","%d to %d",lastState,state);
     }
     else
     {
