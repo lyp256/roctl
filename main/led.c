@@ -4,8 +4,9 @@
 #include "esp_log.h"
 #include "led_strip.h"
 #include "led.h"
+#include "pin.h"
 
-#define LED_GPIO GPIO_NUM_48
+
 #define FRAMETIME 40 // 帧持续时间毫秒
 
 static led_strip_handle_t led_strip;

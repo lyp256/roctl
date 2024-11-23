@@ -10,15 +10,7 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "sw.h"
-
-const int lowSwNum = GPIO_NUM_11;  // 低压开关
-const int highSwNum = GPIO_NUM_12; // 高压开关
-
-const int pupmSwNum = GPIO_NUM_1;     // 压力泵
-const int inSwNum = GPIO_NUM_2;       // 进水
-const int rinseSwNum = GPIO_NUM_42;   // 冲洗
-const int drainSwNum = GPIO_NUM_41;   // 沉水回流
-const int storageSwNum = GPIO_NUM_40; // 压力开关泵
+#include "pin.h"
 
 volatile bool pupmSw = false;    // 压力泵
 volatile bool inSw = false;      // 进水开关

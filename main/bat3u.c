@@ -7,6 +7,7 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "bat3u.h"
+#include "pin.h"
 
 const int BatErrSuccess = 0;           // 0 成功
 const int BatErrTimeOut = -1;          // -1 读取结果超时
@@ -147,9 +148,6 @@ void PrintBat3uData(Bat3uDataT *data)
     printf("Sensor3.TEMP:%d\n", data->Sensor3.TEMP);
 }
 
-#define TDSRX GPIO_NUM_5      // tds UartT rx
-#define TDSTX GPIO_NUM_4      // tds UartT tx
-
 // TDS 数据
 // Sensor1 in tds
 // Sensor2 dirain tds
@@ -160,7 +158,7 @@ void syncTDS(void)
 {
     ESP_LOGI("TDS", "start sync tds!\n");
     UartT pin = {
-        .uartNum = UART_NUM_2,
+        .uartNum = TDSUART,
         .txNum = TDSTX,
         .rxNum = TDSRX,
     };
