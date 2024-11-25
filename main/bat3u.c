@@ -104,7 +104,7 @@ static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, i
     int length = length = uart_write_bytes(pin->uartNum, (const char *)send, sendSize);
     if (length != sendSize)
     {
-        // todo
+        return ESP_FAIL;
     }
 
     // Read data from UartT.
@@ -154,23 +154,15 @@ void PrintBat3uData(Bat3uDataT *data)
 // sensor3 out tds
 volatile Bat3uDataT tdsData;
 
-void syncTDS(void)
+void syncTDS(UartT *pin)
 {
-    ESP_LOGI("TDS", "start sync tds!\n");
-    UartT pin = {
-        .uartNum = TDSUART,
-        .txNum = TDSTX,
-        .rxNum = TDSRX,
-    };
-    InitUart(&pin);
-    for (int i = 0; true; i++)
-    {
+        uint32_t now = esp_log_timestamp();
         ZeroData(&tdsData);
-        int resCode = GetBat3uData(&pin, &tdsData);
+        int resCode = GetBat3uData(pin, &tdsData);
         if (resCode != 0)
         {
-            printf("GetBat3uData:%d\n", resCode);
+            ESP_LOGI("TDS", "GetBat3uData:%d\n", resCode);
         }
+        ESP_LOGV("TDS", "GetBat3uData cost time: %ld", esp_log_timestamp() - now);
         vTaskDelay(pdMS_TO_TICKS(500));
-    }
 }

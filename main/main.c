@@ -13,18 +13,25 @@
 #include "led.h"
 #include "makewater.h"
 #include "oled.h"
+#include "pin.h"
 
 void app_main(void)
 {
+    ESP_LOGI("TDS", "start sync tds!\n");
+    UartT pin = {
+        .uartNum = UART_NUM_1,
+        .txNum = TDSTX,
+        .rxNum = TDSRX,
+    };
+    InitUart(&pin);
     ledPlays_t ledPlayBook = {NULL, 0};
-
-   // xTaskCreate(syncTDS, "syncTDS", 10240, NULL, 1, NULL);
     xTaskCreate(ledLoopTask, "ledLoopTask", 10240, &ledPlayBook, 1, NULL);
     xTaskCreate(oled, "oled", 10240, NULL, 1, NULL);
     initSwGPIO();
     for (uint32_t i = 0; true; i++)
     {
+        syncTDS(&pin);
         makeWater(&ledPlayBook);
-        vTaskDelay(pdMS_TO_TICKS(1500));
+        vTaskDelay(pdMS_TO_TICKS(300));
     }
 }
