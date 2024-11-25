@@ -1,6 +1,5 @@
 #include "driver/gpio.h"
 
-#define LED_GPIO GPIO_NUM_5 // rgb led gpio
 
 #define lowSwNum GPIO_NUM_6  // 低压开关
 #define highSwNum GPIO_NUM_7 // 高压开关
