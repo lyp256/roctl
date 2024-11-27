@@ -26,6 +26,9 @@
 
 #define NullTime -1
 
+// 断水时间
+volatile time_t noWaterAt = NullTime;
+
 // 开始制水时间
 volatile time_t startMakeWaterAt = NullTime;
 
@@ -41,29 +44,43 @@ volatile time_t lastRinseEndAt = NullTime;
 // 距离上一次冲洗后总计制水时间
 volatile time_t makeWaterTotalTime = 0;
 
-void statusStr(char *s, int status)
+void statusStr(char *s, char *msg, int status)
 {
+    time_t lastAt = MAX(lastMakeWaterEndAt, lastRinseEndAt);
+    time_t now = time(NULL);
+    time_t makeWaterTime = now - startMakeWaterAt;
+    time_t rinseTime = now - startRinseAt;
+    time_t noWaterTime = now - noWaterAt;
+    time_t standByTime = now - lastAt;
+
     switch (status)
     {
     case StateStandBy:
         strcpy(s, "Standby");
+        char wtime[20] = "";
+        timeString(wtime, standByTime);
+        sprintf(msg, "%lld/%d %s", makeWaterTotalTime, rinseThresholdTime, wtime);
         break;
     case StateNoWater:
         strcpy(s, "NoWater");
+        sprintf(msg, "%lld/%d Sec", noWaterTime, drainTimeout);
         break;
     case StateMakeWaterDrain:
         strcpy(s, "MakeWaterDrain");
+        sprintf(msg, "%lld/%d Sec", makeWaterTime, drainTimeout);
         break;
     case StateMakeWater:
         strcpy(s, "MakeWater");
+        sprintf(msg, "%lld/%d Sec", makeWaterTime, maxMakeWaterTime);
         break;
     case StateMakeWaterTimeout:
         strcpy(s, "MakeTimeout");
+        sprintf(msg, "%lld/%d Sec", makeWaterTime, maxMakeWaterTime);
         break;
     case StateRinse:
         strcpy(s, "Rinse");
+        sprintf(msg, "%lld/%d Sec", rinseTime, rinseTimeout);
         break;
-
     default:
         break;
     }
@@ -119,8 +136,17 @@ int makeWaterState(Bat3uResT *tds)
             makeWaterTotalTime += lastMakeWaterEndAt - startMakeWaterAt;
             startMakeWaterAt = NullTime;
         }
+        if (noWaterAt == NullTime)
+        {
+            noWaterAt = now;
+        }
+
         state = StateNoWater;
         return state;
+    }
+    else
+    {
+        noWaterAt = NullTime;
     }
 
     // 制水判断
@@ -186,7 +212,7 @@ int makeWaterState(Bat3uResT *tds)
             startRinseAt = NullTime;
             makeWaterTotalTime = 0;
             lastRinseEndAt = now;
-            state = StateRinse;
+            state = StateStandBy;
         }
     }
     return state;
@@ -237,7 +263,6 @@ int makeWater(text_ui_t *ui, Bat3uResT *tds)
         sw.storageSw = false;
         break;
     case StateNoWater:
-
         sw.pupmSw = false;
         sw.inSw = false;
         sw.rinseSw = false;
@@ -257,8 +282,9 @@ int makeWater(text_ui_t *ui, Bat3uResT *tds)
     syncSwGPIOLevel(sw);
 
     char s[32] = "";
-    statusStr(s, state);
-    set_status_ui(ui, s, "");
+    char msg[32] = "";
+    statusStr(s, msg, state);
+    set_status_ui(ui, s, msg);
 
     return state;
 }

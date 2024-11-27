@@ -52,6 +52,6 @@ void app_main(void)
         getTDSData(&pin, &tds);
         set_tds_ui(&ui, &tds);
         makeWater(&ui,&tds);
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
