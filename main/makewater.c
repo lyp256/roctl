@@ -4,14 +4,12 @@
 #include <sys/time.h>
 #include <sys/_timeval.h>
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/uart.h"
 #include "driver/gpio.h"
-#include "sdkconfig.h"
 #include "esp_log.h"
 #include "bat3u.h"
 #include "sw.h"
 #include "oled.h"
+#include "format.h"
 
 #define StateStandBy 1
 #define StateNoWater 2
@@ -43,14 +41,42 @@ volatile time_t lastRinseEndAt = NullTime;
 // 距离上一次冲洗后总计制水时间
 volatile time_t makeWaterTotalTime = 0;
 
-// 冲洗完成
-bool goodRinse()
+void statusStr(char *s, int status)
 {
-    if (tdsData.Sensor1.TDS == 0 || tdsData.Sensor2.TDS == 0)
+    switch (status)
+    {
+    case StateStandBy:
+        strcpy(s, "Standby");
+        break;
+    case StateNoWater:
+        strcpy(s, "NoWater");
+        break;
+    case StateMakeWaterDrain:
+        strcpy(s, "MakeWaterDrain");
+        break;
+    case StateMakeWater:
+        strcpy(s, "MakeWater");
+        break;
+    case StateMakeWaterTimeout:
+        strcpy(s, "MakeTimeout");
+        break;
+    case StateRinse:
+        strcpy(s, "Rinse");
+        break;
+
+    default:
+        break;
+    }
+}
+
+// 冲洗完成
+bool goodRinse(Bat3uResT *tds)
+{
+    if (tds->Sensor1.TDS == 0 || tds->Sensor2.TDS == 0)
     {
         return false;
     }
-    int diff = tdsData.Sensor1.TDS < 10 - tdsData.Sensor2.TDS;
+    int diff = tds->Sensor1.TDS < 10 - tds->Sensor2.TDS;
     return abs(diff) < 10;
 }
 
@@ -61,16 +87,16 @@ short desaltTDS(short in)
 }
 
 // 水质合格
-bool goodWater()
+bool goodWater(Bat3uResT *tds)
 {
-    if (tdsData.Sensor3.TDS == 0||tdsData.Sensor1.TDS == 0)
+    if (tds->Sensor3.TDS == 0 || tds->Sensor1.TDS == 0)
     {
         return false;
     }
-    return tdsData.Sensor3.TDS < 10 || tdsData.Sensor3.TDS <= desaltTDS(tdsData.Sensor1.TDS);
+    return tds->Sensor3.TDS < 10 || tds->Sensor3.TDS <= desaltTDS(tds->Sensor1.TDS);
 }
 
-int makeWaterState()
+int makeWaterState(Bat3uResT *tds)
 {
     int state = StateStandBy;
     time_t now = time(NULL);
@@ -118,7 +144,7 @@ int makeWaterState()
         {
             state = StateMakeWaterTimeout;
         }
-        else if (goodWater() || makeWaterTime > drainTimeout)
+        else if (goodWater(tds) || makeWaterTime > drainTimeout)
         {
             state = StateMakeWater;
         }
@@ -153,7 +179,7 @@ int makeWaterState()
             // 不需要冲洗
             state = StateStandBy;
         }
-        if (startRinseAt != NullTime && (now - startRinseAt > rinseTimeout || goodRinse()))
+        if (startRinseAt != NullTime && (now - startRinseAt > rinseTimeout || goodRinse(tds)))
         {
             // 冲洗结束
             ESP_LOGI("makeWater", "stop rinse!\n");
@@ -168,76 +194,71 @@ int makeWaterState()
 
 int lastState = 0;
 
-void makeWater()
+int makeWater(text_ui_t *ui, Bat3uResT *tds)
 {
-
-
-    int state = makeWaterState();
+    switchs_t sw = {false, false, false, false, false};
+    int state = makeWaterState(tds);
     switch (state)
     {
     case StateRinse:
-        sprintf(uiStatusText, "Rinse");
-        
-        pupmSw = true;
-        inSw = true;
-        rinseSw = true;
-        drainSw = false;
-        storageSw = false;
+        sw.pupmSw = true;
+        sw.inSw = true;
+        sw.rinseSw = true;
+        sw.drainSw = false;
+        sw.storageSw = false;
         break;
     case StateMakeWater:
-        sprintf(uiStatusText, "MakeWater");
-       
-        pupmSw = true;
-        inSw = true;
-        rinseSw = false;
-        drainSw = false;
-        storageSw = true;
+
+        sw.pupmSw = true;
+        sw.inSw = true;
+        sw.rinseSw = false;
+        sw.drainSw = false;
+        sw.storageSw = true;
         break;
     case StateMakeWaterDrain:
-        sprintf(uiStatusText, "MakeWaterDrain");
-        
-        pupmSw = true;
-        inSw = true;
-        rinseSw = false;
-        drainSw = true;
-        storageSw = false;
+        sw.pupmSw = true;
+        sw.inSw = true;
+        sw.rinseSw = false;
+        sw.drainSw = true;
+        sw.storageSw = false;
         break;
     case StateMakeWaterTimeout:
-        sprintf(uiStatusText, "MakeTimeout");
-        pupmSw = false;
-        inSw = false;
-        rinseSw = false;
-        drainSw = false;
-        storageSw = false;
+        sw.pupmSw = false;
+        sw.inSw = false;
+        sw.rinseSw = false;
+        sw.drainSw = false;
+        sw.storageSw = false;
         break;
     case StateStandBy:
-        sprintf(uiStatusText, "StandBy");
-    
-        pupmSw = false;
-        inSw = false;
-        rinseSw = false;
-        drainSw = false;
-        storageSw = false;
+        sw.pupmSw = false;
+        sw.inSw = false;
+        sw.rinseSw = false;
+        sw.drainSw = false;
+        sw.storageSw = false;
         break;
     case StateNoWater:
-        uiStatusText = "NoInWater";
-       
-        pupmSw = false;
-        inSw = false;
-        rinseSw = false;
-        drainSw = false;
-        storageSw = false;
+
+        sw.pupmSw = false;
+        sw.inSw = false;
+        sw.rinseSw = false;
+        sw.drainSw = false;
+        sw.storageSw = false;
         break;
     default:
-        pupmSw = false;
-        inSw = false;
-        rinseSw = false;
-        drainSw = false;
-        storageSw = false;
+        sw.pupmSw = false;
+        sw.inSw = false;
+        sw.rinseSw = false;
+        sw.drainSw = false;
+        sw.storageSw = false;
         ESP_LOGE("makeWater", "unknown state");
     }
 
-   
     lastState = state;
-    syncSwGPIOLevel();
+    syncSwGPIOLevel(sw);
+
+    char s[32] = "";
+    statusStr(s, state);
+    set_status_ui(ui, s, "");
+
+    return state;
 }

@@ -15,6 +15,8 @@
 #include "esp_lcd_panel_vendor.h"
 #include "pin.h"
 #include "bat3u.h"
+#include "oled.h"
+#include "format.h"
 
 static const char *TAG = "oled";
 
@@ -31,65 +33,65 @@ static const char *TAG = "oled";
 #define LCD_CMD_BITS 8
 #define LCD_PARAM_BITS 8
 
-float Celsius(short temp)
-{
-    return ((float)temp) / 100;
-}
-
-volatile const char uiStatusText[20] = "              ";
-volatile const char uiMessageText[20] = "              ";
-
-void text_ui(lv_disp_t *disp)
+void init_text_ui(lv_disp_t *disp, text_ui_t *ui)
 {
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
 
-    lv_obj_t *title = lv_label_create(scr);
-    lv_obj_t *in = lv_label_create(scr);
-    lv_obj_t *out = lv_label_create(scr);
-    lv_obj_t *drain = lv_label_create(scr);
-    lv_obj_t *status = lv_label_create(scr);
-    lv_obj_t *msg = lv_label_create(scr);
-    lv_obj_t *uptime = lv_label_create(scr);
+    ui->title = lv_label_create(scr);
+    ui->in = lv_label_create(scr);
+    ui->out = lv_label_create(scr);
+    ui->drain = lv_label_create(scr);
+    ui->status = lv_label_create(scr);
+    ui->msg = lv_label_create(scr);
+    ui->uptime = lv_label_create(scr);
 
-    lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_align(in, LV_ALIGN_TOP_LEFT, 0, 9);
-    lv_obj_align(out, LV_ALIGN_TOP_LEFT, 0, 18);
-    lv_obj_align(drain, LV_ALIGN_TOP_LEFT, 0, 27);
-    lv_obj_align(status, LV_ALIGN_TOP_MID, 0, 36 + 1);
-    lv_obj_align(msg, LV_ALIGN_TOP_MID, 0, 45 + 2);
-    lv_obj_align(uptime, LV_ALIGN_TOP_MID, 0, 54 + 2);
+    lv_obj_align(ui->title, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(ui->in, LV_ALIGN_TOP_LEFT, 0, 9);
+    lv_obj_align(ui->out, LV_ALIGN_TOP_LEFT, 0, 18);
+    lv_obj_align(ui->drain, LV_ALIGN_TOP_LEFT, 0, 27);
+    lv_obj_align(ui->status, LV_ALIGN_TOP_MID, 0, 36 + 1);
+    lv_obj_align(ui->msg, LV_ALIGN_TOP_MID, 0, 45 + 2);
+    lv_obj_align(ui->uptime, LV_ALIGN_TOP_MID, 0, 54 + 2);
 
-    lv_obj_set_style_text_font(title, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(in, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(out, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(drain, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(status, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(msg, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(uptime, &lv_font_unscii_8, LV_STATE_DEFAULT);
-
-    while (1)
-    {
-        char inText[20];
-        char outText[20];
-        char drainText[20];
-
-        sprintf(inText, "IN:%3dppm %.1f'C", tdsData.Sensor1.TDS, Celsius(tdsData.Sensor1.TDS));
-        sprintf(outText, "OU:%3dppm %.1f'C", tdsData.Sensor3.TDS, Celsius(tdsData.Sensor3.TDS));
-        sprintf(drainText, "DR:%3dppm %.1f'C", tdsData.Sensor2.TDS, Celsius(tdsData.Sensor2.TDS));
-        lv_label_set_text_fmt(title, "   TDS    TEMP  ");
-
-        lv_label_set_text_fmt(in, "%.15s", inText);
-        lv_label_set_text_fmt(out, "%.15s", outText);
-        lv_label_set_text_fmt(drain, "%.15s", drainText);
-        lv_label_set_text_fmt(status, "%.15s", uiStatusText);
-        lv_label_set_text_fmt(msg, "%.15s", uiMessageText);
-        lv_label_set_text_fmt(uptime, "UP:%llu Seca", time(NULL));
-        esp_rom_printf("%s\n", uiStatusText);
-        vTaskDelay(pdMS_TO_TICKS(300));
-    }
+    lv_obj_set_style_text_font(ui->title, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->in, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->out, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->drain, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->status, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->msg, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->uptime, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    // init title
+    lv_label_set_text_fmt(ui->title, "   TDS    TEMP  ");
 }
 
-void oled(void)
+void set_tds_ui(text_ui_t *ui, Bat3uResT *tds)
+{
+    char inText[20];
+    char outText[20];
+    char drainText[20];
+    char uptimeText[20];
+    timeString(uptimeText, time(NULL));
+    sprintf(inText, "IN:%03dppm %0.1f'C", tds->Sensor1.TDS, celsius(tds->Sensor1.TDS));
+    sprintf(outText, "OU:%03dppm %0.1f'C", tds->Sensor3.TDS, celsius(tds->Sensor3.TDS));
+    sprintf(drainText, "DR:%03dppm %0.1f'C", tds->Sensor2.TDS, celsius(tds->Sensor2.TDS));
+
+    lv_label_set_text_fmt(ui->in, "%.15s", inText);
+    lv_label_set_text_fmt(ui->out, "%.15s", outText);
+    lv_label_set_text_fmt(ui->drain, "%.15s", drainText);
+    lv_label_set_text_fmt(ui->uptime, "%s", uptimeText);
+}
+
+void set_status_ui(text_ui_t *ui, char *status, char *msg)
+{
+
+    char uptimeText[20];
+    timeString(uptimeText, time(NULL));
+    lv_label_set_text_fmt(ui->status, "%.15s", status);
+    lv_label_set_text_fmt(ui->msg, "%.15s", msg);
+    lv_label_set_text_fmt(ui->uptime, "%s", uptimeText);
+}
+
+void init_oled(text_ui_t *ui)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
 
@@ -150,6 +152,5 @@ void oled(void)
 
     /* Rotation of the screen */
     lv_disp_set_rotation(disp, LV_DISP_ROT_180);
-
-    text_ui(disp);
+    init_text_ui(disp, ui);
 }

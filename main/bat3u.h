@@ -12,8 +12,7 @@ typedef struct
     SensorDataT Sensor1;
     SensorDataT Sensor2;
     SensorDataT Sensor3;
-} Bat3uDataT;
-
+} Bat3uResT;
 
 typedef struct
 {
@@ -22,11 +21,8 @@ typedef struct
 
 } UartT;
 
-int GetBat3uData(UartT *UartT, Bat3uDataT *res);
+int GetBat3uData(UartT *UartT, Bat3uResT *res);
 esp_err_t InitUart(UartT *pin);
-void PrintBat3uData(Bat3uDataT *data);
-void ZeroData(Bat3uDataT *res);
-
-extern volatile Bat3uDataT tdsData;
-void syncTDS(UartT *pin);
+void PrintBat3uData(Bat3uResT *data);
+void ZeroData(Bat3uResT *res);
 #endif

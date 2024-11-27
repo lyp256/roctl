@@ -14,21 +14,44 @@
 #include "oled.h"
 #include "pin.h"
 
+void getTDSData(UartT *pin, Bat3uResT *tds)
+{
+    Bat3uResT res;
+    uint32_t now = esp_log_timestamp();
+    int resCode = GetBat3uData(pin, &res);
+    ESP_LOGV("TDS", "GetBat3uData cost time: %ld", esp_log_timestamp() - now);
+    if (resCode != 0)
+    {
+        ESP_LOGE("TDS", "GetBat3uData:%d\n", resCode);
+        return;
+    }
+    tds->Sensor1 = res.Sensor1;
+    tds->Sensor2 = res.Sensor2;
+    tds->Sensor3 = res.Sensor3;
+}
+
 void app_main(void)
 {
-    ESP_LOGI("TDS", "start sync tds!\n");
+    // switch init
+    initSwGPIO();
+
+    // tds uart
     UartT pin = {
         .uartNum = UART_NUM_1,
         .txNum = TDSTX,
         .rxNum = TDSRX,
     };
+    Bat3uResT tds;
+    ZeroData(&tds);
     InitUart(&pin);
-    xTaskCreate(oled, "oled", 10240, NULL, 1, NULL);
-    initSwGPIO();
+    text_ui_t ui;
+    init_oled(&ui);
+    set_tds_ui(&ui, &tds);
     for (uint32_t i = 0; true; i++)
     {
-        syncTDS(&pin);
-        makeWater();
-        vTaskDelay(pdMS_TO_TICKS(300));
+        getTDSData(&pin, &tds);
+        set_tds_ui(&ui, &tds);
+        makeWater(&ui,&tds);
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }

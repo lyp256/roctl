@@ -23,7 +23,7 @@ short parseShort(char bytes[2])
     return (short)(bytes[0]) << 8 | (short)(bytes[1]);
 }
 
-void ZeroData(Bat3uDataT *res)
+void ZeroData(Bat3uResT *res)
 {
     res->Sensor1.TDS = 0;
     res->Sensor1.TEMP = 0;
@@ -33,7 +33,7 @@ void ZeroData(Bat3uDataT *res)
     res->Sensor3.TEMP = 0;
 }
 
-void parseSensorsResult(void *data, Bat3uDataT *res)
+void parseSensorsResult(void *data, Bat3uResT *res)
 {
     ZeroData(res);
     res->Sensor1.TDS = parseShort(data);
@@ -44,7 +44,7 @@ void parseSensorsResult(void *data, Bat3uDataT *res)
     res->Sensor3.TEMP = parseShort(data + 10);
 }
 
-int GetBat3uData(UartT *UartT, Bat3uDataT *res)
+int GetBat3uData(UartT *UartT, Bat3uResT *res)
 {
     const char directive[6] = "\xA0\x00\x00\x00\x00\xA0";
 
@@ -101,6 +101,7 @@ esp_err_t InitUart(UartT *pin)
 
 static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, int receiveSize, int *receiveN)
 {
+    uart_flush_input(pin->uartNum);
     int length = length = uart_write_bytes(pin->uartNum, (const char *)send, sendSize);
     if (length != sendSize)
     {
@@ -109,7 +110,7 @@ static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, i
 
     // Read data from UartT.
     length = 0;
-    for (long i = 0; i < 10; i++)
+    for (long i = 0; i < 100; i++)
     {
 
         esp_err_t resCode = uart_get_buffered_data_len(pin->uartNum, (size_t *)&length);
@@ -117,13 +118,13 @@ static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, i
         {
             return resCode;
         }
-        if (length > 0)
+        if (length >= receiveSize)
         {
             break;
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
-    if (length == 0)
+    if (length <= receiveSize)
     {
         return ESP_ERR_TIMEOUT;
     }
@@ -133,12 +134,12 @@ static esp_err_t UartCall(UartT *pin, void *send, int sendSize, void *receive, i
         length = receiveSize;
     }
 
-    length = uart_read_bytes(pin->uartNum, receive, length, 100);
+    length = uart_read_bytes(pin->uartNum, receive, length, pdMS_TO_TICKS(10));
     *receiveN = length;
-    return 0;
+    return ESP_OK;
 }
 
-void PrintBat3uData(Bat3uDataT *data)
+void PrintBat3uData(Bat3uResT *data)
 {
     printf("Sensor1.TDS:%d\n", data->Sensor1.TDS);
     printf("Sensor1.TEMP:%d\n", data->Sensor1.TEMP);
@@ -146,23 +147,4 @@ void PrintBat3uData(Bat3uDataT *data)
     printf("Sensor2.TEMP:%d\n", data->Sensor2.TEMP);
     printf("Sensor3.TDS:%d\n", data->Sensor3.TDS);
     printf("Sensor3.TEMP:%d\n", data->Sensor3.TEMP);
-}
-
-// TDS 数据
-// Sensor1 in tds
-// Sensor2 dirain tds
-// sensor3 out tds
-volatile Bat3uDataT tdsData;
-
-void syncTDS(UartT *pin)
-{
-        uint32_t now = esp_log_timestamp();
-        ZeroData(&tdsData);
-        int resCode = GetBat3uData(pin, &tdsData);
-        if (resCode != 0)
-        {
-            ESP_LOGI("TDS", "GetBat3uData:%d\n", resCode);
-        }
-        ESP_LOGV("TDS", "GetBat3uData cost time: %ld", esp_log_timestamp() - now);
-        vTaskDelay(pdMS_TO_TICKS(500));
 }

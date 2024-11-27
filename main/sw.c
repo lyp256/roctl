@@ -12,12 +12,6 @@
 #include "sw.h"
 #include "pin.h"
 
-volatile bool pupmSw = false;    // 压力泵
-volatile bool inSw = false;      // 进水开关
-volatile bool rinseSw = false;   // 冲洗开关
-volatile bool drainSw = false;   // 陈水回流开关
-volatile bool storageSw = false; // 储水桶开关
-
 int lowSw()
 {
     return gpio_get_level(lowSwNum);
@@ -57,11 +51,11 @@ void initSwGPIO()
     }
 }
 
-void syncSwGPIOLevel()
+void syncSwGPIOLevel(switchs_t s)
 {
-    gpio_set_level(inSwNum, inSw);
-    gpio_set_level(pupmSwNum, pupmSw);
-    gpio_set_level(rinseSwNum, rinseSw);
-    gpio_set_level(drainSwNum, drainSw);
-    gpio_set_level(storageSwNum, storageSw);
+    gpio_set_level(inSwNum, s.inSw);
+    gpio_set_level(pupmSwNum, s.pupmSw);
+    gpio_set_level(rinseSwNum, s.rinseSw);
+    gpio_set_level(drainSwNum, s.drainSw);
+    gpio_set_level(storageSwNum, s.storageSw);
 }

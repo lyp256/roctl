@@ -81,13 +81,13 @@
   ],
   "connections": [
     [
-      "esp:TX",
+      "esp:19",
       "$serialMonitor:RX",
       "",
       []
     ],
     [
-      "esp:RX",
+      "esp:18",
       "$serialMonitor:TX",
       "",
       []
