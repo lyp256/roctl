@@ -3,7 +3,6 @@
 #include "lvgl.h"
 typedef struct 
 {
-    lv_obj_t *title;
     lv_obj_t *in;
     lv_obj_t *out;
     lv_obj_t *drain;

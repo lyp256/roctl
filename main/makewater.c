@@ -56,29 +56,29 @@ void statusStr(char *s, char *msg, int status)
     switch (status)
     {
     case StateStandBy:
-        strcpy(s, "Standby");
+        strcpy(s, "待机");
         char wtime[20] = "";
         timeString(wtime, standByTime);
         sprintf(msg, "%lld/%d %s", makeWaterTotalTime, rinseThresholdTime, wtime);
         break;
     case StateNoWater:
-        strcpy(s, "NoWater");
+        strcpy(s, "缺水");
         sprintf(msg, "%lld/%d Sec", noWaterTime, drainTimeout);
         break;
     case StateMakeWaterDrain:
-        strcpy(s, "MakeWaterDrain");
+        strcpy(s, "陈水循环");
         sprintf(msg, "%lld/%d Sec", makeWaterTime, drainTimeout);
         break;
     case StateMakeWater:
-        strcpy(s, "MakeWater");
+        strcpy(s, "制水中");
         sprintf(msg, "%lld/%d Sec", makeWaterTime, maxMakeWaterTime);
         break;
     case StateMakeWaterTimeout:
-        strcpy(s, "MakeTimeout");
+        strcpy(s, "制水超时");
         sprintf(msg, "%lld/%d Sec", makeWaterTime, maxMakeWaterTime);
         break;
     case StateRinse:
-        strcpy(s, "Rinse");
+        strcpy(s, "冲洗");
         sprintf(msg, "%lld/%d Sec", rinseTime, rinseTimeout);
         break;
     default:

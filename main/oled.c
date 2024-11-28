@@ -36,32 +36,25 @@ static const char *TAG = "oled";
 void init_text_ui(lv_disp_t *disp, text_ui_t *ui)
 {
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
-
-    ui->title = lv_label_create(scr);
     ui->in = lv_label_create(scr);
     ui->out = lv_label_create(scr);
     ui->drain = lv_label_create(scr);
     ui->status = lv_label_create(scr);
     ui->msg = lv_label_create(scr);
     ui->uptime = lv_label_create(scr);
+    lv_obj_align(ui->status, LV_ALIGN_TOP_MID, 0, -1);
+    lv_obj_align(ui->msg, LV_ALIGN_TOP_MID, 0, 17);
+    lv_obj_align(ui->uptime, LV_ALIGN_TOP_MID, 0, 26);
+    lv_obj_align(ui->in, LV_ALIGN_TOP_LEFT, 0, 35);
+    lv_obj_align(ui->out, LV_ALIGN_TOP_LEFT, 0, 44);
+    lv_obj_align(ui->drain, LV_ALIGN_TOP_LEFT, 0, 53);
 
-    lv_obj_align(ui->title, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_obj_align(ui->in, LV_ALIGN_TOP_LEFT, 0, 9);
-    lv_obj_align(ui->out, LV_ALIGN_TOP_LEFT, 0, 18);
-    lv_obj_align(ui->drain, LV_ALIGN_TOP_LEFT, 0, 27);
-    lv_obj_align(ui->status, LV_ALIGN_TOP_MID, 0, 36 + 1);
-    lv_obj_align(ui->msg, LV_ALIGN_TOP_MID, 0, 45 + 2);
-    lv_obj_align(ui->uptime, LV_ALIGN_TOP_MID, 0, 54 + 2);
-
-    lv_obj_set_style_text_font(ui->title, &lv_font_unscii_8, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->status, &lv_font_simsun_16_cjk, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->in, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->out, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->drain, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui->status, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->msg, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->uptime, &lv_font_unscii_8, LV_STATE_DEFAULT);
-    // init title
-    lv_label_set_text_fmt(ui->title, "   TDS    TEMP  ");
 }
 
 void set_tds_ui(text_ui_t *ui, Bat3uResT *tds)
@@ -71,9 +64,9 @@ void set_tds_ui(text_ui_t *ui, Bat3uResT *tds)
     char drainText[20];
     char uptimeText[20];
     timeString(uptimeText, time(NULL));
-    sprintf(inText, "IN:%03dppm %0.1f'C", tds->Sensor1.TDS, celsius(tds->Sensor1.TDS));
-    sprintf(outText, "OU:%03dppm %0.1f'C", tds->Sensor3.TDS, celsius(tds->Sensor3.TDS));
-    sprintf(drainText, "DR:%03dppm %0.1f'C", tds->Sensor2.TDS, celsius(tds->Sensor2.TDS));
+    sprintf(inText, "IN: %03dppm %0.1fC", tds->Sensor1.TDS, celsius(tds->Sensor1.TDS));
+    sprintf(outText, "OU: %03dppm %0.1fC", tds->Sensor3.TDS, celsius(tds->Sensor3.TDS));
+    sprintf(drainText, "DR: %03dppm %0.1fC", tds->Sensor2.TDS, celsius(tds->Sensor2.TDS));
 
     lv_label_set_text_fmt(ui->in, "%.15s", inText);
     lv_label_set_text_fmt(ui->out, "%.15s", outText);
