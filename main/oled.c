@@ -17,6 +17,7 @@
 #include "bat3u.h"
 #include "oled.h"
 #include "format.h"
+#include "status_font.h"
 
 static const char *TAG = "oled";
 
@@ -42,14 +43,14 @@ void init_text_ui(lv_disp_t *disp, text_ui_t *ui)
     ui->status = lv_label_create(scr);
     ui->msg = lv_label_create(scr);
     ui->uptime = lv_label_create(scr);
-    lv_obj_align(ui->status, LV_ALIGN_TOP_MID, 0, -1);
+    lv_obj_align(ui->status, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_align(ui->msg, LV_ALIGN_TOP_MID, 0, 17);
     lv_obj_align(ui->uptime, LV_ALIGN_TOP_MID, 0, 26);
     lv_obj_align(ui->in, LV_ALIGN_TOP_LEFT, 0, 35);
     lv_obj_align(ui->out, LV_ALIGN_TOP_LEFT, 0, 44);
     lv_obj_align(ui->drain, LV_ALIGN_TOP_LEFT, 0, 53);
 
-    lv_obj_set_style_text_font(ui->status, &lv_font_simsun_16_cjk, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui->status, &status_font, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->in, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->out, &lv_font_unscii_8, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui->drain, &lv_font_unscii_8, LV_STATE_DEFAULT);
