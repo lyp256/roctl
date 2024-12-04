@@ -19,10 +19,10 @@ typedef struct
     uart_port_t uartNum;
     int txNum, rxNum;
 
-} UartT;
+} uart_t;
 
-int GetBat3uData(UartT *UartT, Bat3uResT *res);
-esp_err_t InitUart(UartT *pin);
+int GetBat3uData(uart_t *pin, Bat3uResT *res);
+esp_err_t InitUart(uart_t *pin);
 void PrintBat3uData(Bat3uResT *data);
 void ZeroData(Bat3uResT *res);
 #endif

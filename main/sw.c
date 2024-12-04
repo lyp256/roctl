@@ -14,12 +14,12 @@
 
 int lowSw()
 {
-    return gpio_get_level(lowSwNum);
+    return !gpio_get_level(lowSwNum);
 }
 
 int highSw()
 {
-    return gpio_get_level(highSwNum);
+    return !gpio_get_level(highSwNum);
 }
 
 void initSwGPIO()
@@ -35,6 +35,7 @@ void initSwGPIO()
         gpio_reset_pin(num);
         gpio_set_direction(num, GPIO_MODE_OUTPUT);
         gpio_set_level(num, 0);
+        gpio_set_drive_capability(num,GPIO_DRIVE_CAP_3);
     }
     // init input
     for (int i = 0; i < insLen; i++)
@@ -43,8 +44,8 @@ void initSwGPIO()
         gpio_config_t cfg = {
             .pin_bit_mask = BIT64(num),
             .mode = GPIO_MODE_INPUT,
-            .pull_up_en = false,
-            .pull_down_en = true,
+            .pull_up_en = true,
+            .pull_down_en = false,
             .intr_type = GPIO_INTR_DISABLE,
         };
         gpio_config(&cfg);

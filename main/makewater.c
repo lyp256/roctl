@@ -26,6 +26,10 @@
 
 #define NullTime -1
 
+#ifndef MAX
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+#endif
+
 // 断水时间
 volatile time_t noWaterAt = NullTime;
 
@@ -52,7 +56,7 @@ void statusStr(char *s, char *msg, int status)
     time_t rinseTime = now - startRinseAt;
     time_t noWaterTime = now - noWaterAt;
     time_t standByTime = now - lastAt;
-// 待机缺水陈水循环制水中制水超时冲洗
+    // 待机缺水陈水循环制水中制水超时冲洗
     switch (status)
     {
     case StateStandBy:

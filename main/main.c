@@ -14,7 +14,7 @@
 #include "oled.h"
 #include "pin.h"
 
-void getTDSData(UartT *pin, Bat3uResT *tds)
+void getTDSData(uart_t *pin, Bat3uResT *tds)
 {
     Bat3uResT res;
     uint32_t now = esp_log_timestamp();
@@ -36,7 +36,7 @@ void app_main(void)
     initSwGPIO();
 
     // tds uart
-    UartT pin = {
+    uart_t pin = {
         .uartNum = UART_NUM_1,
         .txNum = TDSTX,
         .rxNum = TDSRX,
